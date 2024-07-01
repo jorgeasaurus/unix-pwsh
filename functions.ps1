@@ -144,7 +144,9 @@ function du {
 }
 
 # Short ulities
-function ll { Get-ChildItem -Path $pwd -File }
+
+Set-Alias ll Get-ChildItemColor -Option AllScope
+Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
 function df {get-volume}
 
 # Aliases for reboot and poweroff
@@ -234,4 +236,141 @@ function ssh-copy-key {
     $pubKeyPath = "~\.ssh\id_ed25519.pub"
     $sshCommand = "cat $pubKeyPath | ssh $user@$ip 'cat >> ~/.ssh/authorized_keys'"
     Invoke-Expression $sshCommand
+}
+
+function sys {
+    Start-Process -FilePath cmd.exe -Verb Runas -ArgumentList '/k C:\Windows\System32\PsExec.exe -i -accepteula -s powershell.exe'
+}
+function Search-RegistryUninstallKey {
+    param($SearchFor, [switch]$Wow6432Node)
+    $results = @()
+    $keys = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall", "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" -ea 0 |
+    ForEach-Object {
+        class x64 {
+            [string]$GUID
+            [string]$Publisher
+            [string]$DisplayName
+            [string]$DisplayVersion
+            [string]$InstallLocation
+            [string]$InstallDate
+            [string]$UninstallString
+            [string]$Wow6432Node
+        }
+        $x64 = [x64]::new()
+        $x64.GUID = $_.pschildname
+        $x64.Publisher = $_.GetValue('Publisher')
+        $x64.DisplayName = $_.GetValue('DisplayName')
+        $x64.DisplayVersion = $_.GetValue('DisplayVersion')
+        $x64.InstallLocation = $_.GetValue('InstallLocation')
+        $x64.InstallDate = $_.GetValue('InstallDate')
+        $x64.UninstallString = $_.GetValue('UninstallString')
+        if ($Wow6432Node) {
+            $x64.Wow6432Node = 'No'
+        }
+        $results += $x64
+    }
+    if ($Wow6432Node) {
+        $keys = Get-ChildItem HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall |
+        ForEach-Object {
+            class x86 {
+                [string]$GUID
+                [string]$Publisher
+                [string]$DisplayName
+                [string]$DisplayVersion
+                [string]$InstallLocation
+                [string]$InstallDate
+                [string]$UninstallString
+                [string]$Wow6432Node
+            }
+            $x86 = [x86]::new()
+            $x86.GUID = $_.pschildname
+            $x86.Publisher = $_.GetValue('Publisher')
+            $x86.DisplayName = $_.GetValue('DisplayName')
+            $x86.DisplayVersion = $_.GetValue('DisplayVersion')
+            $x86.InstallLocation = $_.GetValue('InstallLocation')
+            $x86.InstallDate = $_.GetValue('InstallDate')
+            $x86.UninstallString = $_.GetValue('UninstallString')
+            $x86.Wow6432Node = 'Yes'
+            $results += $x86
+        }
+    }
+    $results | Sort-Object DisplayName | Where-Object { $_.DisplayName -match $SearchFor }
+}
+
+function reload-profile {
+    & $profile.CurrentUserAllHosts
+}
+function Invoke-ModuleCleanup {
+    Update-Module -Force
+    Get-InstalledModule | ForEach-Object {
+        $CurrentVersion = $PSItem.Version
+        Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
+    } | Uninstall-Module -Verbose
+}
+
+function Invoke-Spongebob {
+    [cmdletbinding()]
+    param(
+        [Parameter(HelpMessage = "provide string" , Mandatory = $true)]
+        [string]$Message
+    )
+    $charArray = $Message.ToCharArray()
+
+    foreach ($char in $charArray) {
+        $Var = $(Get-Random) % 2
+        if ($var -eq 0) {
+            $string = $char.ToString()
+            $Upper = $string.ToUpper()
+            $output = $output + $Upper
+        } else {
+            $lower = $char.ToString()
+            $output = $output + $lower
+        }
+    }
+    $output
+    $output = $null
+}
+function youtube {
+
+    Begin {
+        $query = 'https://www.youtube.com/results?search_query='
+    }
+    Process {
+        Write-Host $args.Count, "Arguments detected"
+        "Parsing out Arguments: $args"
+        for ($i = 0; $i -le $args.Count; $i++) {
+            $args | ForEach-Object { "Arg $i `t $_ `t Length `t" + $_.Length, " characters"; $i++ }
+        }
+
+        $args | ForEach-Object { $query = $query + "$_+" }
+        $url = "$query"
+    }
+    End {
+        $url.Substring(0, $url.Length - 1)
+        "Final Search will be $url"
+        "Invoking..."
+        Start-Process "$url"
+    }
+}
+function Google {
+
+    Begin {
+        $query = 'https://www.google.com/search?q='
+    }
+    Process {
+        Write-Host $args.Count, "Arguments detected"
+        "Parsing out Arguments: $args"
+        for ($i = 0; $i -le $args.Count; $i++) {
+            $args | ForEach-Object { "Arg $i `t $_ `t Length `t" + $_.Length, " characters"; $i++ }
+        }
+
+        $args | ForEach-Object { $query = $query + "$_+" }
+        $url = "$query"
+    }
+    End {
+        $url.Substring(0, $url.Length - 1)
+        "Final Search will be $url"
+        "Invoking..."
+        Start-Process "$url"
+    }
 }

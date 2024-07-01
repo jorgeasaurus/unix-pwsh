@@ -30,7 +30,7 @@ Never directly inject any code from the World-Wide-Web into your devices, that y
 ## TL:DR
 - Paste this into your Powershell and afterwards into your $PROFILE, with the command `notepad $PROFILE`:
 ```bash
-iex (iwr "https://raw.githubusercontent.com/CrazyWolf13/unix-pwsh/main/Microsoft.PowerShell_profile.ps1").Content
+iex (iwr "https://raw.githubusercontent.com/jorgeasaurus/unix-pwsh/main/Microsoft.PowerShell_profile.ps1").Content
 ```
 
 ## Features 🌟

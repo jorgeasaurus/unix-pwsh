@@ -1,47 +1,33 @@
 # Check Internet and exit if it takes longer than 1 second
 $canConnectToGitHub = Test-Connection github.com -Count 1 -Quiet -TimeoutSeconds 1
 $configPath = "$HOME\pwsh_custom_config.yml"
-$githubUser = "CrazyWolf13"
-$name= ""
-$OhMyPoshConfig = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/montys.omp.json"
-$font="FiraCode" # Font-Display and variable Name, name the same as font_folder
-$font_url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraCode.zip" # Put here the URL of the font file that should be installed
-$fontFileName = "FiraCodeNerdFontMono-Regular.ttf" # Put here the font file that should be installed
-$font_folder = "FiraCode" # Put here the name of the zip folder, but without the .zip extension.
+$githubUser = "jorgeasaurus"
+$name = "Jorge"
+$OhMyPoshConfig = "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/powerlevel10k_rainbow.omp.json"
+$font = "Cascadia Code NF" # Font-Display and variable Name, name the same as font_folder
+$font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2404.23/CascadiaCode-2404.23.zip" # Put here the URL of the font file that should be installed
+$fontFileName = "CascadiaCodeNF.ttf" # Put here the font file that should be installed
+$font_folder = "CascadiaCode-2404.23\ttf" # Put here the name of the zip folder, but without the .zip extension.
+$UserProfile = $HOME
+Set-Variable -Name Onedrive -Value "$UserProfile\OneDrive" -Scope global
 
 function Initialize-DevEnv {
     if (-not $global:canConnectToGitHub) {
         Write-Host "❌ Skipping dev-environment initialization due to GitHub.com not responding within 1 second." -ForegroundColor Red
         return
     }
-    $modules = @(
-        @{ Name = "Terminal-Icons"; ConfigKey = "Terminal-Icons_installed" },
-        @{ Name = "Powershell-Yaml"; ConfigKey = "Powershell-Yaml_installed" },
-        @{ Name = "PoshFunctions"; ConfigKey = "PoshFunctions_installed" }
-    )
-    $importedModuleCount = 0
-    foreach ($module in $modules) {
-        $isInstalled = Get-ConfigValue -Key $module.ConfigKey
-        if ($isInstalled -ne "True") {
-            Write-Host "Initializing $($module.Name) module..."
-            Initialize-Module $module.Name
-        } else {
-            Import-Module $module.Name
-            $importedModuleCount++
-        }
-    }
-    Write-Host "✅ Imported $importedModuleCount modules successfully." -ForegroundColor Green
+    
     if ($ohmyposh_installed -ne "True") { 
         Write-Host "⚡ Invoking Helper-Script" -ForegroundColor Yellow
         . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/pwsh_helper.ps1" -UseBasicParsing).Content
         Test-ohmyposh 
-        }
-        $font_installed_var = "${font}_installed"
+    }
+    $font_installed_var = "${font}_installed"
     if (((Get-Variable -Name $font_installed_var).Value) -ne "True") {
         Write-Host "⚡ Invoking Helper-Script" -ForegroundColor Yellow
         . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/pwsh_helper.ps1" -UseBasicParsing).Content
         Test-$font
-        }
+    }
     
     Write-Host "✅ Successfully initialized Pwsh with all modules and applications`n" -ForegroundColor Green
 }
@@ -55,7 +41,26 @@ function Install-Config {
         Write-Host "✅ Successfully loaded config file" -ForegroundColor Green
     }
     Initialize-Keys
-    Initialize-DevEnv
+
+    $modules = @(
+        @{ Name = "Powershell-Yaml"; ConfigKey = "Powershell-Yaml_installed" },
+        @{ Name = "Terminal-Icons"; ConfigKey = "Terminal-Icons_installed" },
+        @{ Name = "PoshFunctions"; ConfigKey = "PoshFunctions_installed" },
+        @{ Name = "Get-ChildItemColor"; ConfigKey = "Get-ChildItemColor_installed" }
+
+    )
+    $importedModuleCount = 0
+    foreach ($module in $modules) {
+        $isInstalled = Get-ConfigValue -Key $module.ConfigKey
+        if ($isInstalled -ne "True") {
+            Write-Host "Initializing $($module.Name) module..."
+            Initialize-Module $module.Name
+        } else {
+            Import-Module $module.Name
+            $importedModuleCount++
+        }
+    }
+    Write-Host "✅ Imported $importedModuleCount modules successfully." -ForegroundColor Green
 }
 
 # Function to set a value in the config file
@@ -119,7 +124,7 @@ function Initialize-Module {
 }
 
 function Initialize-Keys {
-    $keys = "Terminal-Icons_installed", "Powershell-Yaml_installed", "PoshFunctions_installed", "${font}_installed", "ohmyposh_installed"
+    $keys = "Terminal-Icons_installed", "Powershell-Yaml_installed", "PoshFunctions_installed", "Get-ChildItemColor_installed", "${font}_installed", "ohmyposh_installed"
     foreach ($key in $keys) {
         $value = Get-ConfigValue -Key $key
         Set-Variable -Name $key -Value $value -Scope Global
@@ -136,15 +141,6 @@ Write-Host ""
 
 
 Install-Config
-
-# Try to import MS PowerToys WinGetCommandNotFound
-Import-Module -Name Microsoft.WinGet.CommandNotFound > $null 2>&1
-if (-not $?) { Write-Host "💭 Make sure to install WingetCommandNotFound by MS PowerToys" -ForegroundColor Yellow }
-
-# Inject OhMyPosh
-oh-my-posh init pwsh --config $OhMyPoshConfig | Invoke-Expression
-
-
 
 # ----------------------------------------------------------
 # Deferred loading
@@ -168,58 +164,110 @@ $Deferred = {
     } > $null 2>&1
 }
 
+$Tab = '  '
 
-$GlobalState = [psmoduleinfo]::new($false)
-$GlobalState.SessionState = $ExecutionContext.SessionState
+# Set PowerShell Telemetry OptOut
+$env:POWERSHELL_TELEMETRY_OPTOUT = $true
 
-# to run our code asynchronously
-$Runspace = [runspacefactory]::CreateRunspace($Host)
-$Powershell = [powershell]::Create($Runspace)
-$Runspace.Open()
-$Runspace.SessionStateProxy.PSVariable.Set('GlobalState', $GlobalState)
-
-# ArgumentCompleters are set on the ExecutionContext, not the SessionState
-# Note that $ExecutionContext is not an ExecutionContext, it's an EngineIntrinsics 😡
-$Private = [Reflection.BindingFlags]'Instance, NonPublic'
-$ContextField = [Management.Automation.EngineIntrinsics].GetField('_context', $Private)
-$Context = $ContextField.GetValue($ExecutionContext)
-
-# Get the ArgumentCompleters. If null, initialise them.
-$ContextCACProperty = $Context.GetType().GetProperty('CustomArgumentCompleters', $Private)
-$ContextNACProperty = $Context.GetType().GetProperty('NativeArgumentCompleters', $Private)
-$CAC = $ContextCACProperty.GetValue($Context)
-$NAC = $ContextNACProperty.GetValue($Context)
-if ($null -eq $CAC)
-{
-    $CAC = [Collections.Generic.Dictionary[string, scriptblock]]::new()
-    $ContextCACProperty.SetValue($Context, $CAC)
-}
-if ($null -eq $NAC)
-{
-    $NAC = [Collections.Generic.Dictionary[string, scriptblock]]::new()
-    $ContextNACProperty.SetValue($Context, $NAC)
+#region Setting Variables Based on Platform
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    $WindowsPowerShell = $true
 }
 
-# Get the AutomationEngine and ExecutionContext of the runspace
-$RSEngineField = $Runspace.GetType().GetField('_engine', $Private)
-$RSEngine = $RSEngineField.GetValue($Runspace)
-$EngineContextField = $RSEngine.GetType().GetFields($Private) | Where-Object {$_.FieldType.Name -eq 'ExecutionContext'}
-$RSContext = $EngineContextField.GetValue($RSEngine)
-
-# Set the runspace to use the global ArgumentCompleters
-$ContextCACProperty.SetValue($RSContext, $CAC)
-$ContextNACProperty.SetValue($RSContext, $NAC)
-
-$Wrapper = {
-    # Without a sleep, you get issues:
-    #   - occasional crashes
-    #   - prompt not rendered
-    #   - no highlighting
-    # Assumption: this is related to PSReadLine.
-    # 20ms seems to be enough on my machine, but let's be generous - this is non-blocking
-    Start-Sleep -Milliseconds 100
-
-    . $GlobalState {. $Deferred; Remove-Variable Deferred}
+switch ([System.Environment]::OSVersion.Platform) {
+    "Win32NT" { 
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            'PowerShell on Windows - PSVersion {0}' -f $PSVersionTable.PSVersion
+        } else {
+            'Windows PowerShell - PSVersion {0}' -f $PSVersionTable.PSVersion
+        }
+    
+        $global:IsAdmin = [bool](([System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
+    
+        # Try to import MS PowerToys WinGetCommandNotFound
+        Import-Module -Name Microsoft.WinGet.CommandNotFound > $null 2>&1
+        if (-not $?) { Write-Host "💭 Make sure to install WingetCommandNotFound by MS PowerToys" -ForegroundColor Yellow }
+    
+    
+        if (($env:TERM_PROGRAM -ne 'vscode') -and $global:IsAdmin) {
+            winget upgrade --all
+        }
+    
+        Initialize-DevEnv
+    
+        $PSReadLineHistoryFile = [System.IO.Path]::Combine($Onedrive, 'PSReadLine', 'PSReadLineHistory.txt')
+        
+    }
+    "Unix" {
+        'PowerShell on Mac - PSVersion {0}' -f $PSVersionTable.PSVersion
+        $global:IsAdmin = $false
+        $PSReadLineHistoryFile = "$Onedrive/PSReadLine/PSReadLineHistory.txt"
+        $OhMyPoshCommand = "/opt/homebrew/bin/oh-my-posh"
+        $BrewCommand = "/opt/homebrew/bin/brew"
+        if (-not(Test-Path $BrewCommand)) {
+            Write-Host "❌ Please install HomeBrew via a bash terminal" -ForegroundColor Red
+            Write-Host "Use the following command:" -ForegroundColor Red
+            Write-Host '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' -ForegroundColor Yellow
+            Write-Host "ReOpen Pwsh afterwards" -ForegroundColor Yellow
+            return
+        }
+        if (-not(Test-Path $OhMyPoshCommand)) {
+            & $BrewCommand install jandedobbeleer/oh-my-posh/oh-my-posh
+        }
+    }
+    Default {}
 }
 
-$null = $Powershell.AddScript($Wrapper.ToString()).BeginInvoke()
+#region PSReadLine
+''
+'PSReadLine:'
+
+$PSReadLineHistoryPath = Split-Path -Path $PSReadLineHistoryFile -Parent -ErrorAction SilentlyContinue
+if (-Not ($PSReadLineHistoryPath)) {
+    '{0}Creating PSReadLine history path: {1}' -f $Tab, $PSReadLineHistoryPath
+    try {
+        New-Item -Path $PSReadLineHistoryPath -ItemType Directory -Force
+    } catch {
+        '{0}Failed to create PSReadLine history path. Error: {1}' -f $Tab, $_
+    }
+}
+
+Set-PSReadLineKeyHandler -Key Escape -Function RevertLine
+Set-PSReadLineKeyHandler -Function MenuComplete -Chord 'Ctrl+@'
+Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+Set-PSReadLineOption -ShowToolTips -BellStyle Visual
+Set-PSReadLineOption -Colors @{
+    Comment  = [consolecolor]::DarkBlue
+    Operator = [consolecolor]::DarkBlue
+    String   = [consolecolor]::DarkMagenta
+}
+$PSReadLineOptions = @{
+    HistoryNoDuplicates = $true
+    HistorySaveStyle    = 'SaveIncrementally'
+    HistorySavePath     = $PSReadLineHistoryFile
+}
+try {
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        $PSReadLineOptions.Add('PredictionSource', 'History')
+        $PSReadLineOptions.Add('PredictionViewStyle', 'ListView')
+        $PSReadLineOptions.Add('EditMode', 'Windows')
+
+    }
+    Set-PSReadLineOption @PSReadLineOptions
+    '{0}Set PSReadLine options.' -f $Tab
+} catch {
+    'Failed to set PSReadLine options. Error: {0}' -f $_
+}
+
+# Inject OhMyPosh
+if (Test-Path $OhMyPoshCommand) {
+    $OhMyPoshVersion = (&"$OhMyPoshCommand" --version)
+    '{0}Oh My Posh version {1} is installed. Loading custom theme.' -f $Tab, $OhMyPoshVersion
+        (@(&"$OhMyPoshCommand" init pwsh --config="$OhMyPoshConfig" --print) -join [System.Environment]::NewLine) | Invoke-Expression
+} else {
+    '{0}Oh My Posh configuration file ({1}) not found. Not loading Oh My Posh.' -f $Tab, $OhMyPoshConfig | Write-Warning
+}
+
+#endregion
