@@ -1,0 +1,626 @@
+install-module
+install-module Terminal-Icons
+Set-ExecutionPolicy Bypass -Scope Process -Force; Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://ohmyposh.dev/install.ps1'))
+Install-Module psreadline
+Install-Module psreadline -Force
+find-module pswindowsupdate
+install-module pswindowsupdate -force
+Get-Command -Module PSWindowsUpdate
+Get-WindowsUpdate
+Install-WindowsUpdate -AcceptAll -ForceInstall
+Install-WindowsUpdate -AcceptAll -ForceInstall -Verbose
+winget --upgrade 
+winget upgrade
+winget upgrade --all
+winget upgrade
+winget upgrade Microsoft.WindowsTerminal
+winget search powershell
+winget install Microsoft.PowerShell
+ll
+cd ./OneDrive/
+code ./PS_Profile.ps1
+reload-profile
+ll
+find-module fetch
+find-module "*fetch"
+Install-Module psscreenfetch
+import-Module psscreenfetch
+Get-Command -Module psscreenfetch
+Invoke-PSScreenfetch
+unInstall-Module psscreenfetch
+iex (new-object net.webclient).DownloadString('https://raw.githubusercontent.com/jantari/powerfetch/master/powerfetch.ps1')
+cls
+ll
+Get-info
+code $PROFILE
+code "C:\Users\jorge\OneDrive\PS_Profile.ps1"
+winget upgrade --all
+winget
+iex (new-object net.webclient).DownloadString('https://raw.githubusercontent.com/jantari/powerfetch/master/powerfetch.ps1')
+code $PROFILE
+code "C:\Users\jorge\OneDrive\PS_Profile.ps1"
+code /Users/jorgeasaurus/OneDrive/PS_Profile.ps1
+reload-profile
+code /Users/jorgeasaurus/.config/powershell/profile.ps1
+code $PROFILE
+reload-profile
+Update-Module
+Update-Module -Force
+Update-Module -Force -Verbose
+cls
+Get-Module -ListAvailable
+find-module "*fetch"
+find-module "*fetch*"
+find-module "*info*"
+find-module "*macos*"
+find-module "*apple*"
+find-module "*winget*"
+find-module "*intune*"
+find-module "*spacex*"
+install-module SpaceX -Verbose
+gcm -Module spacex
+Get-SXMission
+Get-SXApi
+Get-SXShip
+Get-SXRocket
+Get-SXRoadster
+Find-Module "*api*"
+install-module PSPublicAPI -Verbose -Force
+gcm -Module PSPublicAPI
+Get-PSPublicAPICategory
+Get-PSPublicAPIHealth
+Get-PSPublicAPIRandomEntry
+uninstall-module PSPublicAPI -Verbose -Force
+Install-Module Pester -MinimumVersion 5.0.2
+Install-Module PSKoans -Scope CurrentUser
+Install-Module PSKoans
+$env:PSModulePath
+$env:PSModulePath[0]
+$env:PSModulePath[1]
+$env:PSModulePath -split ":"
+$env:PSModulePath -split ":" | select -First 1
+cd ($env:PSModulePath -split ":" | select -First 1)
+git clone https://github.com/vexx32/PSKoans.git
+Show-Karma
+cd ($env:PSModulePath -split ":" | select -First 1)
+ls
+cd ./PSKoansRepo/
+code .
+Show-Karma
+cd..
+cd ./PSKoans/
+coode .
+code .
+Import-Module pskoans
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+Get-PSRepository
+Install-Module PSKoans
+remove-item /Users/jorgeasaurus/.local/share/powershell/Modules/PSKoans -Recurse
+remove-item /Users/jorgeasaurus/.local/share/powershell/Modules/PSKoans -Recurse -Force
+remove-item /Users/jorgeasaurus/.local/share/powershell/Modules/PSKoansRepo/ -Force -Recurse
+Install-Module PSKoans
+Show-Karma
+Show-Karma -Contemplate
+Show-Karma
+Show-Karma -Meditate
+Show-Karma
+pip
+reload-profile
+pip
+sh
+pip
+$env:path
+python3
+pip3
+alias python='python3'
+alias pip='pip3'
+pip
+python
+Set-Alias -Name "python"
+python
+Set-Alias -Name "pip"
+pip
+pip install matrix-webcam
+git clone https://github.com/CursedPrograms/Detect-Face.git
+cd ./Desktop/cd..
+cd ..
+cd ~
+cd ./Detect-Face/
+s
+ls
+https://github.com/CursedPrograms/Detect-Face.git
+pip install -r requirements.txt
+reload-profile
+pip install -r requirements.txt
+pip3 install -r requirements.txt
+Set-Alias -Name "pip" -Value "pip3"
+pip3 install -r requirements.txt
+Set-Alias -Name "python" -Value "python3"
+pip3 install -r requirements.txt
+matrix-webcam
+$ git clone https://github.com/joschuck/matrix-webcam.git
+$ cd matrix-webcam
+$ python -m pip install .
+ git clone https://github.com/joschuck/matrix-webcam.git
+python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade Pillow
+pip3 install -r requirements.txt
+$ cd matrix-webcam
+ cd matrix-webcam
+python -m pip install .
+pip install opencv-pytho
+pip install opencv-python
+python3 -m pip install packaging
+python3 -c"from packaging import tags; print('\n'.join([str(t) for t in tags.sys_tags()]))" |head -5
+python -m pip install .
+code .
+cd ~
+ls
+remove-ite ./matrix-webcam/
+remove-item ./matrix-webcam/ -Force
+remove-item ./detect-face/ -Force
+ls
+cd ./OneDrive/Desktop/Stuff/Webcam-Face-Detect/
+python3 ./webcam_cv3_label.py
+python3 './gpt face.py'
+pip
+pip3 install opencv-python
+pip3 install opencv-python force
+./webcam_cv3_label.py
+python3 webcam_cv3_label.py
+python3 webcam_cv3.py
+python3 webcam_cv3_label.py
+Install-Module Pester -MinimumVersion 5.0.2
+python3 webcam_cv3_label.py
+"powershell" -split
+"powershell" -split ""
+$splitstring = "powershell" -split ""
+$splitstring.Length
+$splitstringLength | ForEach-Object {`
+    $_`
+}
+$splitstringLength = $splitstring.Length`
+$splitstringLength | ForEach-Object {`
+    $_`
+}
+for ($i in $splitstringLength){`
+    $i`
+}
+for ($i -in $splitstringLength){`
+    $i`
+}
+foreach ($i in $splitstringLength){`
+    $i`
+}
+0..$splitstringLength | %{`
+    $_`
+}
+$string = "powershell"`
+$stringLength = $string.Length`
+0..$stringLength | %{`
+    $_`
+}
+0..$stringLength | %{`
+    $string[-$_]`
+}
+0..($stringLength-1) | %{`
+    $string[-$_]`
+}
+1..($stringLength) | %{`
+    $string[-$_]`
+}
+$string = "powershell"`
+$stringLength = $string.Length`
+[string]$newstring = $null`
+1..($stringLength) | %{`
+    $newstring+=$string[-$_]`
+}`
+Write-Host $newstring
+function Reverse-String {`
+    param (`
+        [string]$string`
+    )`
+`
+    $stringLength = $string.Length`
+    [string]$newstring = $null`
+    1..($stringLength) | ForEach-Object {`
+        $newstring += $string[ - $_]`
+    }`
+    Write-Host $newstring`
+}`
+`
+
+cls
+cls
+cd ~
+function Reverse-String {`
+    param (`
+        [string]$string`
+    )`
+`
+    $stringLength = $string.Length`
+    [string]$newstring = $null`
+    1..($stringLength) | ForEach-Object {`
+        $newstring += $string[ - $_]`
+    }`
+    Write-Host $newstring`
+}
+Reverse-String "Jennifer Ochoa"
+Reverse-String "Dallas Texas"
+Invoke-Spongebob "Jennifer Ochoa"
+cls
+Reverse-String "What reasonable feature that most owners want but Tesla refuses to give them?"
+Reverse-String "Jennifer Ochoa"
+Invoke-Spongebob "Jorge"
+Invoke-Spongebob "Jennifer Ochoa"
+$sentence = "This is a sample sentence."
+$sentence -split " "
+($sentence[-1] -in @(".","?","!"))
+$x = "0.3.1-15-g3b885c5"
+$x.split("-",3)[-1]
+$x.split("-",3)
+$x.split("-",2)
+$sentence -split ""
+$sentence -split " "
+$sentence = "This is a sample sentence."`
+$sentenceArray = $sentence -split " "`
+foreach ($word in $sentenceArray){`
+    Reverse-String $word`
+}
+$sentence = "This is a sample sentence."`
+$sentenceArray = $sentence -split " "`
+$newSentence = ""`
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence+= "$reversedWord"`
+}`
+$newSentence
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence+= "$reversedWord"`
+    $newSentence`
+}
+$newSentence = ""`
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence= $newSentence+"$reversedWord"`
+    $newSentence`
+}
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence= $newSentence+"$reversedWord "`
+    $newSentence`
+}
+$newSentence = ""`
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence= $newSentence+$reversedWord `
+    $newSentence`
+}`
+$newSentence
+function Reverse-String {`
+    param (`
+        [string]$string`
+    )`
+`
+    $stringLength = $string.Length`
+    [string]$newstring = $null`
+    1..($stringLength) | ForEach-Object {`
+        $newstring += $string[ - $_]`
+    }`
+    return $newstring`
+}`
+`
+function Reverse-Sentence {`
+    param (`
+        [string]$sentence`
+    )`
+    `
+}`
+`
+$sentence = "This is a sample sentence."`
+$sentenceArray = $sentence -split " "`
+$newSentence = ""`
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence= $newSentence+$reversedWord `
+    $newSentence`
+}
+$sentence = "This is a sample sentence."`
+$sentenceArray = $sentence -split " "`
+$newSentence = ""`
+foreach ($word in $sentenceArray){`
+    $reversedWord = $null `
+    $reversedWord = Reverse-String $word`
+    $newSentence= $newSentence+$reversedWord `
+}`
+$newSentence
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += $sentence[ - $_]`
+    }
+$newSentence
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += $sentence[ - $_]`
+    }`
+    return $newSentence
+$sentence
+1..($sentenceArray.Length)
+$sentenceArray
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += Reverse-String ($sentence[ - $_])`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    0..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += Reverse-String ($sentence[ - $_])`
+    }`
+    return $newSentence
+   [string]$newSentence = $null`
+    0..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += Reverse-String $sentence[ - $_]`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    0..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += Reverse-String $sentenceArray[ - $_]`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    0..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_] + " ")`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    0..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_]) + " "`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_]) + " "`
+    }`
+    return $newSentence
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_]) + " "`
+        $_`
+    }
+$sentenceArray[ - 5]
+$sentenceArray[ - 1]
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_])`
+        if (!($_ -eq 1)) {`
+            $newSentence += " "`
+        }`
+    }
+$newSentence
+$sentenceArray.Length -1
+$sentenceArray.Length -0
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_])`
+        if (!($_ -eq 1) -or !($_ -eq ($sentenceArray.Length - 0))) {`
+            $newSentence += " "`
+        }`
+    }`
+    return $newSentence
+$sentence.Length
+$newsentence.Length
+$sentenceArray.Length -0
+$sentenceArray.Length
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_])`
+        if (!($_ -eq 1) -or !($_ -eq ($sentenceArray.Length))) {`
+            $newSentence += " "`
+        }`
+    }`
+    return $newSentence.Length
+$newSentence
+$Sentence
+function Reverse-Sentence {`
+    param (`
+        [string]$sentence`
+    )`
+    $sentenceArray = $sentence -split " "`
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_])`
+        if (!($_ -eq 1) -or !($_ -eq ($sentenceArray.Length))) {`
+            $newSentence += " "`
+        }`
+    }`
+    return $newSentence`
+}`
+`
+Reverse-Sentence "This is a sample sentence. Bro"`
+
+`
+function Reverse-Sentence {`
+    param (`
+        [Parameter(`
+            Position = 0, `
+            Mandatory = $true, `
+            ValueFromPipeline = $true,`
+            ValueFromPipelineByPropertyName = $true)`
+        ]`
+        [string]$sentence`
+    )`
+    $sentenceArray = $sentence -split " "`
+    [string]$newSentence = $null`
+    1..($sentenceArray.Length) | ForEach-Object {`
+        $newSentence += (Reverse-String $sentenceArray[ - $_])`
+        if (!($_ -eq 1) -or !($_ -eq ($sentenceArray.Length))) {`
+            $newSentence += " "`
+        }`
+    }`
+    return $newSentence`
+}`
+`
+"This is a sample sentence. Bro" | Reverse-Sentence 
+$test
+cls
+$env:TERM_PROGRAM
+code $PROFILE
+code /Users/jorgeasaurus/OneDrive/PS_Profile.ps1
+code "$ENV:USERPROFILE\OneDrive\PS_Profile.ps1"
+reload-profile
+$PROFILE.CurrentUserAllHosts
+code $PROFILE.CurrentUserAllHosts
+gci "*profile.ps1" -Recurse
+code $PROFILE
+gci "*_profile.ps1" -Recurse
+reload-profile
+gci "Microsoft.*_profile.ps1" -Recurse
+gci "Microsoft.*_profile.ps1" -Recurse | % {code $_.FullName}
+code "C:\Users\jorge\OneDrive\Multi_Platform_PS_Profile\PS_Profile.ps1"
+$msg = @"`
+-------------------------------------------------------------------------------------`
+| Reminder:                                                                         |`
+| Remove the `$remote pssession after you exit and before you close the profile tab. |`
+|                                                                                   |`
+| PS C:\> `$remote | Remove-PSSession                                                |`
+| PS C:\> exit                                                                      |`
+-------------------------------------------------------------------------------------`
+`
+"@`
+`
+#you may need to adjust colors based on your profile settings`
+Write-host $msg -ForegroundColor Magenta -BackgroundColor Gray
+winget upgrade
+Search-RegistryUninstallKey -Wow6432Node oh
+winget search oh-my-posh
+winget install JanDeDobbeleer.OhMyPosh
+winget install JanDeDobbeleer.OhMyPosh --source winget
+winget uninstall JanDeDobbeleer.OhMyPosh
+reload-profile
+winget uninstall JanDeDobbeleer.OhMyPosh
+reload-profile
+gci "Microsoft.*_profile.ps1" -Recurse | select $_.FullName
+gci "Microsoft.*_profile.ps1" -Recurse | select FullName
+gci "Microsoft.*_profile.ps1" -Recurse | select FullName | % {code $_.FullName}
+code $PROFILE
+Get-Content $profile
+$expectedProfileContent = ". `"`$ENV:USERPROFILE\OneDrive\Multi_Platform_PS_Profile\PS_Profile.ps1`""
+$ProfileContent = Get-Content $profile 
+$ProfileContent -eq $expectedProfileContent
+cd 'C:\Users\jorge\OneDrive\Desktop\Intune\PS Term\Microsoft.PowerShell_profile.ps1'
+code 'C:\Users\jorge\OneDrive\Desktop\Intune\PS Term\Microsoft.PowerShell_profile.ps1'
+Get-ChildItem "Microsoft.*_profile.ps1" -Recurse | Select-Object FullName | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if($ProfileContent -ne $expectedProfileContent){`
+        Split-Path $_.FullName -Leaf`
+        Split-Path $_.FullName -Parent`
+    }`
+}
+$profiles = Get-ChildItem "Microsoft.*_profile.ps1" -Recurse
+$profiles | Select-Object FullName | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if($ProfileContent -ne $expectedProfileContent){`
+        Split-Path $_.FullName -Leaf`
+        Split-Path $_.FullName -Parent`
+        $_.Name`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if($ProfileContent -ne $expectedProfileContent){`
+        Split-Path $_.FullName -Leaf`
+        Split-Path $_.FullName -Parent`
+        $_.Name`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $ParentDir = $_.Name`
+        $fileName = Split-Path $_.FullName -Parent`
+        $ParentDir`
+        $fileName`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $fileName = $_.Name`
+        $ParentDir = Split-Path $_.FullName -Parent`
+        $ParentDir`
+        $fileName`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $fileName = $_.Name`
+        $fullname = $_.FullName`
+        $ParentDir = Split-Path $_.FullName -Parent`
+        $ParentDir`
+        $fileName`
+        rename-item -LiteralPath $fullname -NewName (Join-Path $ParentDir "Microsoft.PowerShell_profile.Deprecated.ps1") -WhatIf`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $fileName = $_.Name`
+        $fullname = $_.FullName`
+        $ParentDir = Split-Path $_.FullName -Parent`
+        rename-item -LiteralPath $fullname -NewName (Join-Path $ParentDir "Microsoft.PowerShell_profile.Deprecated.ps1") -WhatIf`
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $fileName = $_.Name`
+        $fullname = $_.FullName`
+        Read-Host "Open $fullname in Code"`
+        code $fullname`
+        Read-Host "rename?"`
+        $ParentDir = Split-Path $_.FullName -Parent`
+        rename-item -LiteralPath $fullname -NewName (Join-Path $ParentDir "Microsoft.PowerShell_profile.Deprecated.ps1") -WhatIf`
+        `
+    }`
+}
+$profiles  | ForEach-Object {`
+`
+    $ProfileContent = Get-Content $_.FullName`
+    if ($ProfileContent -ne $expectedProfileContent) {`
+        $fileName = $_.Name`
+        $fullname = $_.FullName`
+        Read-Host "Open $fullname in Code"`
+        code $fullname`
+        Read-Host "rename?"`
+        $ParentDir = Split-Path $_.FullName -Parent`
+        rename-item -LiteralPath $fullname -NewName (Join-Path $ParentDir "Microsoft.PowerShell_profile.Deprecated.ps1")`
+        `
+    }`
+}
+Get-ChildItem "Microsoft.*_profile.ps1" -Recurse
+$PROFILE.AllUsersAllHosts
+code "C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1"
+cd 'C:\Users\jorge\OneDrive\Multi_Platform_PS_Profile'
+echo "# Multi-Platform-PS-Profile" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/jorgeasaurus/Multi-Platform-PS-Profile.git
+git push -u origin main
+.\Install-Profile.ps1
+code .

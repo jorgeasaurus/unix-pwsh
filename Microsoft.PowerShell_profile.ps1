@@ -188,7 +188,7 @@ switch ([System.Environment]::OSVersion.Platform) {
         Import-Module -Name Microsoft.WinGet.CommandNotFound > $null 2>&1
         if (-not $?) { Write-Host "💭 Make sure to install WingetCommandNotFound by MS PowerToys" -ForegroundColor Yellow }
     
-    
+        $OhMyPoshCommand = (Get-Command -Name 'oh-my-posh.exe' -ea 0).Source
         if (($env:TERM_PROGRAM -ne 'vscode') -and $global:IsAdmin) {
             winget upgrade --all
         }
