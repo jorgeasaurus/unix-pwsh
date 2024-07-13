@@ -108,41 +108,6 @@ function unzip {
     }
 }
 
-function du {
-    param (
-        [string]$Path = (Get-Location)
-    )
-    try {
-        # Get all items recursively at the specified path.
-        $items = Get-ChildItem -Path $Path -Recurse -ErrorAction SilentlyContinue
-        # Separate files and directories
-        $files = $items | Where-Object { -not $_.PSIsContainer }
-        $directories = $items | Where-Object { $_.PSIsContainer }
-        # Measure properties
-        $fileCount = $files.Count
-        $directoryCount = $directories.Count
-        $totalBytes = ($files | Measure-Object -Property Length -Sum).Sum
-        # Convert bytes to a human-readable format
-        if ($totalBytes -ge 1TB) {
-            $size = "{0:N2} TB" -f ($totalBytes / 1TB)
-        } elseif ($totalBytes -ge 1GB) {
-            $size = "{0:N2} GB" -f ($totalBytes / 1GB)
-        } elseif ($totalBytes -ge 1MB) {
-            $size = "{0:N2} MB" -f ($totalBytes / 1MB)
-        } elseif ($totalBytes -ge 1KB) {
-            $size = "{0:N2} KB" -f ($totalBytes / 1KB)
-        } else {
-            $size = "{0:N2} bytes" -f $totalBytes
-        }
-        # Output results
-        Write-Output "Directory Count : $directoryCount"
-        Write-Output "File Count      : $fileCount"
-        Write-Output "Total Size      : $size"
-    } catch {
-        Write-Output "An error occurred: $_"
-    }
-}
-
 # Short ulities
 
 Set-Alias ll Get-ChildItemColor -Option AllScope
@@ -168,47 +133,6 @@ function admin {
         Start-Process "wt.exe" -Verb runAs
     }
 }
-Set-Alias -Name sudo -Value admin
-
-# Hash functions
-function md5 {
-    param (
-        [string]$Path
-    )
-    process {
-        if ($Path) {
-            Get-FileHash -Algorithm MD5 $Path
-        } else {
-            $input | ForEach-Object { Get-FileHash -Algorithm MD5 $_ }
-        }
-    }
-}
-
-function sha1 {
-    param (
-        [string]$Path
-    )
-    process {
-        if ($Path) {
-            Get-FileHash -Algorithm SHA1 $Path
-        } else {
-            $input | ForEach-Object { Get-FileHash -Algorithm SHA1 $_ }
-        }
-    }
-}
-
-function sha256 {
-    param (
-        [string]$Path
-    )
-    process {
-        if ($Path) {
-            Get-FileHash -Algorithm SHA256 $Path
-        } else {
-            $input | ForEach-Object { Get-FileHash -Algorithm SHA256 $_ }
-        }
-    }
-}
 
 # Display system uptime
 function uptime {
@@ -223,20 +147,6 @@ function uptime {
     return "Online since $($uptime.Days) days, $($uptime.Hours) hours, $($uptime.Minutes) minutes"
 }
 
-
-
-function ssh-copy-key {
-    param(
-        [parameter(Position=0)]
-        [string]$user,
-
-        [parameter(Position=1)]
-        [string]$ip
-    )
-    $pubKeyPath = "~\.ssh\id_ed25519.pub"
-    $sshCommand = "cat $pubKeyPath | ssh $user@$ip 'cat >> ~/.ssh/authorized_keys'"
-    Invoke-Expression $sshCommand
-}
 
 function sys {
     Start-Process -FilePath cmd.exe -Verb Runas -ArgumentList '/k C:\Windows\System32\PsExec.exe -i -accepteula -s powershell.exe'
@@ -296,7 +206,6 @@ function Search-RegistryUninstallKey {
     }
     $results | Sort-Object DisplayName | Where-Object { $_.DisplayName -match $SearchFor }
 }
-
 function reload-profile {
     & $profile.CurrentUserAllHosts
 }

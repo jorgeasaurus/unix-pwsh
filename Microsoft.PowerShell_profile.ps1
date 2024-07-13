@@ -142,13 +142,14 @@ Write-Host ""
 
 Install-Config
 
+. Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/functions.ps1" -UseBasicParsing).Content
+
 # ----------------------------------------------------------
 # Deferred loading
 # ----------------------------------------------------------
 
 
 $Deferred = {
-    . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/functions.ps1" -UseBasicParsing).Content
     # Create profile if not exists
     if (-not (Test-Path -Path $PROFILE)) {
         New-Item -ItemType File -Path $PROFILE | Out-Null
@@ -261,6 +262,17 @@ try {
     'Failed to set PSReadLine options. Error: {0}' -f $_
 }
 
+function reload-profile {
+    & $profile.CurrentUserAllHosts
+}
+function Invoke-ModuleCleanup {
+    Update-Module -Force
+    Get-InstalledModule | ForEach-Object {
+        $CurrentVersion = $PSItem.Version
+        Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
+    } | Uninstall-Module -Verbose
+}
+
 # Inject OhMyPosh
 if (Test-Path $OhMyPoshCommand) {
     $OhMyPoshVersion = (&"$OhMyPoshCommand" --version)
@@ -269,5 +281,7 @@ if (Test-Path $OhMyPoshCommand) {
 } else {
     '{0}Oh My Posh configuration file ({1}) not found. Not loading Oh My Posh.' -f $Tab, $OhMyPoshConfig | Write-Warning
 }
+
+
 
 #endregion

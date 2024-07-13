@@ -1,0 +1,76 @@
+{
+    "terminal.integrated.enableMultiLinePasteWarning": false,
+    "security.workspace.trust.untrustedFiles": "open",
+    "window.zoomLevel": 1,
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "terminal.external.osxExec": "iTerm.app",
+    "editor.formatOnType": true,
+    "powershell.codeFormatting.addWhitespaceAroundPipe": true,
+    "powershell.codeFormatting.autoCorrectAliases": true,
+    "powershell.codeFormatting.useCorrectCasing": true,
+    "powershell.codeFormatting.preset": "OTBS",
+    "files.defaultLanguage": "powershell",
+    "editor.tabCompletion": "on",
+    "editor.fontFamily": "Cascadia Code NF",
+    "terminal.integrated.fontFamily": "Cascadia Code NF",
+    "debug.console.fontFamily": "Cascadia Code NF",
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "workbench.colorTheme": "One Monokai",
+    "workbench.iconTheme": "vscode-icons",
+    "powershell.pester.codeLens": false,
+    "editor.tokenColorCustomizations": {
+        "textMateRules": [
+            {
+                "name": "One Dark italic",
+                "scope": [
+                    "comment",
+                    "entity.other.attribute-name",
+                    "keyword",
+                    "markup.underline.link",
+                    "storage.modifier",
+                    "storage.type",
+                    "string.url",
+                    "variable.language.super",
+                    "variable.language.this"
+                ],
+                "settings": {
+                    "fontStyle": "italic"
+                }
+            },
+            {
+                "name": "One Dark italic reset",
+                "scope": [
+                    "keyword.operator",
+                    "keyword.other.type",
+                    "storage.modifier.import",
+                    "storage.modifier.package",
+                    "storage.type.built-in",
+                    "storage.type.function.arrow",
+                    "storage.type.generic",
+                    "storage.type.java",
+                    "storage.type.primitive"
+                ],
+                "settings": {
+                    "fontStyle": ""
+                }
+            }
+        ]
+    },
+    "git.autofetch": true,
+    "git.enableSmartCommit": true,
+    "editor.minimap.enabled": false,
+    "git.confirmSync": false,
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    },
+    "security.allowedUNCHosts": [
+        "Mac"
+    ]
+}
