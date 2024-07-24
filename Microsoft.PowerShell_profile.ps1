@@ -3,7 +3,7 @@ $canConnectToGitHub = Test-Connection github.com -Count 1 -Quiet -TimeoutSeconds
 $configPath = "$HOME\pwsh_custom_config.yml"
 $githubUser = "jorgeasaurus"
 $name = "Jorge"
-$OhMyPoshConfig = "https://raw.githubusercontent.com/jorgeasaurus/unix-pwsh/main/assets/powerlevel10k_rainbow.omp.json"
+$OhMyPoshConfig = "/opt/homebrew/opt/oh-my-posh/themes/powerlevel10k_rainbow.omp.json"
 $font = "Cascadia Code NF" # Font-Display and variable Name, name the same as font_folder
 $font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2404.23/CascadiaCode-2404.23.zip" # Put here the URL of the font file that should be installed
 $fontFileName = "CascadiaCodeNF.ttf" # Put here the font file that should be installed
@@ -211,9 +211,12 @@ switch ([System.Environment]::OSVersion.Platform) {
             Write-Host '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' -ForegroundColor Yellow
             Write-Host "ReOpen Pwsh afterwards" -ForegroundColor Yellow
             return
+        } else {
+            # add Homebrew
+            $(/opt/homebrew/bin/brew shellenv) | Invoke-Expression
         }
         if (-not(Test-Path $OhMyPoshCommand)) {
-            & $BrewCommand install jandedobbeleer/oh-my-posh/oh-my-posh
+            brew install jandedobbeleer/oh-my-posh/oh-my-posh
         }
     }
     Default {}
