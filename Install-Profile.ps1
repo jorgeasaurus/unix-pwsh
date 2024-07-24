@@ -44,8 +44,6 @@ switch ([System.Environment]::OSVersion.Platform) {
     Default {}
 }
 
-$IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')
-
 
 #no errors throughout
 $ErrorActionPreference = 'silentlycontinue'
@@ -75,11 +73,6 @@ foreach ($Font in $FontList) {
 
 }
 
-if (Test-Path "$HOME\OneDrive") {
-    Copy-Item "$PSScriptRoot\MS.png" "$HOME\OneDrive\Documents\PowerShell\MS.png" -Force
-} else {
-    Copy-Item "$PSScriptRoot\MS.png" "C:\Code\PowerShell\MS.png" -Force
-}
 
 $terminalDir = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
 if (Test-Path $terminalDir) {
@@ -87,7 +80,7 @@ if (Test-Path $terminalDir) {
 }
 
 Install-Module PowerShellGet -Force
-Update-Module PowerShellGet -Force
+Update-Module PowerShellGet -Force -ErrorAction 0
 Install-Module -Name PSReadLine -AllowPrerelease -Scope CurrentUser -Force -SkipPublisherCheck
 
 Install-Module WindowsConsoleFonts -Force
