@@ -1,9 +1,9 @@
 switch ([System.Environment]::OSVersion.Platform) {
     "Win32NT" { 
         if ($PSVersionTable.PSEdition -eq 'Core') {
-            'PowerShell on Windows - PSVersion {0}' -f $PSVersionTable.PSVersion
+            Write-Host "✅ PowerShell on Windows - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         } else {
-            'Windows PowerShell - PSVersion {0}' -f $PSVersionTable.PSVersion
+            Write-Host "✅ Windows PowerShell - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         }
     
         $global:IsAdmin = [bool](([System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -20,10 +20,26 @@ switch ([System.Environment]::OSVersion.Platform) {
             Exit
         }
 
-    
+        $FontList = Get-ChildItem -Path $PSScriptRoot -Include ('*.fon', '*.otf', '*.ttc', '*.ttf') -Recurse
+
+        foreach ($Font in $FontList) {
+
+            Write-Host 'Installing font -' $Font.BaseName
+
+            Copy-Item $Font "C:\Windows\Fonts"
+
+            #register font for all users
+            New-ItemProperty -Name $Font.BaseName -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -PropertyType string -Value $Font.name -ErrorAction 0
+        }
+
+        $terminalDir = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+        if (Test-Path $terminalDir) {
+            Copy-Item "$PSScriptRoot\settings.json" "$terminalDir\LocalState\settings.json" -Force
+        }
+
     }
     "Unix" {
-        'PowerShell on Mac - PSVersion {0}' -f $PSVersionTable.PSVersion
+        Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         $global:IsAdmin = $false
         $PSReadLineHistoryFile = "$Onedrive/PSReadLine/PSReadLineHistory.txt"
         $OhMyPoshCommand = "/opt/homebrew/bin/oh-my-posh"
@@ -59,25 +75,6 @@ $profile.CurrentUserCurrentHost | ForEach-Object {
 
 Copy-Item $PSScriptRoot\Microsoft.PowerShell_profile.ps1 $PROFILE.CurrentUserAllHosts -Force
 
-$FontList = Get-ChildItem -Path $PSScriptRoot -Include ('*.fon', '*.otf', '*.ttc', '*.ttf') -Recurse
-
-foreach ($Font in $FontList) {
-
-    Write-Host 'Installing font -' $Font.BaseName
-
-    Copy-Item $Font "C:\Windows\Fonts"
-
-    #register font for all users
-
-    New-ItemProperty -Name $Font.BaseName -Path "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" -PropertyType string -Value $Font.name -ErrorAction 0
-
-}
-
-
-$terminalDir = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
-if (Test-Path $terminalDir) {
-    Copy-Item "$PSScriptRoot\settings.json" "$terminalDir\LocalState\settings.json" -Force
-}
 
 Install-Module PowerShellGet -Force
 Update-Module PowerShellGet -Force -ErrorAction 0

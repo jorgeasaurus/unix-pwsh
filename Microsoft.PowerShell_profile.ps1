@@ -178,9 +178,9 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 switch ([System.Environment]::OSVersion.Platform) {
     "Win32NT" { 
         if ($PSVersionTable.PSEdition -eq 'Core') {
-            'PowerShell on Windows - PSVersion {0}' -f $PSVersionTable.PSVersion
+            Write-Host "✅ PowerShell on Windows - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         } else {
-            'Windows PowerShell - PSVersion {0}' -f $PSVersionTable.PSVersion
+            Write-Host "✅ Windows PowerShell - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         }
     
         $global:IsAdmin = [bool](([System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
@@ -200,7 +200,7 @@ switch ([System.Environment]::OSVersion.Platform) {
         
     }
     "Unix" {
-        'PowerShell on Mac - PSVersion {0}' -f $PSVersionTable.PSVersion
+                Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         $global:IsAdmin = $false
         $PSReadLineHistoryFile = "$Onedrive/PSReadLine/PSReadLineHistory.txt"
         $OhMyPoshCommand = "/opt/homebrew/bin/oh-my-posh"
