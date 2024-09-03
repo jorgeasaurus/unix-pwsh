@@ -200,7 +200,7 @@ switch ([System.Environment]::OSVersion.Platform) {
         
     }
     "Unix" {
-                Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
+        Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         $global:IsAdmin = $false
         $PSReadLineHistoryFile = "$Onedrive/PSReadLine/PSReadLineHistory.txt"
         $OhMyPoshCommand = "/opt/homebrew/bin/oh-my-posh"
@@ -269,11 +269,17 @@ function reload-profile {
     & $profile
 }
 function Invoke-ModuleCleanup {
-    Update-Module -Force
-    Get-InstalledModule | ForEach-Object {
-        $CurrentVersion = $PSItem.Version
-        Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
-    } | Uninstall-Module -Verbose
+    $Modules = Get-InstalledModule | Sort-Object Name | Get-PSModuleUpdates -OutdatedOnly
+    if ($Modules) {
+        Write-Output "Modules need updating."
+        Write-Output "Running 'Invoke-ModuleCleanup'"
+        $Modules | Format-Table
+        Update-Module -Force
+        Get-InstalledModule | ForEach-Object {
+            $CurrentVersion = $PSItem.Version
+            Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
+        } | Uninstall-Module -Verbose
+    }
 }
 
 # Inject OhMyPosh
@@ -285,12 +291,8 @@ if (Test-Path $OhMyPoshCommand) {
     '{0}Oh My Posh configuration file ({1}) not found. Not loading Oh My Posh.' -f $Tab, $OhMyPoshConfig | Write-Warning
 }
 
-$Modules = Get-InstalledModule | Sort-Object Name | Get-PSModuleUpdates -OutdatedOnly
-if ($Modules){
-    Write-Output "Modules need updating."
-    Write-Output "Run 'Invoke-ModuleCleanup'"
-}
-$Modules | Format-Table
+
+
 
 
 #endregion
