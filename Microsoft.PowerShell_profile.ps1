@@ -266,7 +266,7 @@ try {
 }
 
 function reload-profile {
-    & $profile.CurrentUserAllHosts
+    & $profile
 }
 function Invoke-ModuleCleanup {
     Update-Module -Force
@@ -285,6 +285,12 @@ if (Test-Path $OhMyPoshCommand) {
     '{0}Oh My Posh configuration file ({1}) not found. Not loading Oh My Posh.' -f $Tab, $OhMyPoshConfig | Write-Warning
 }
 
+$Modules = Get-InstalledModule | Sort-Object Name | Get-PSModuleUpdates -OutdatedOnly
+if ($Modules){
+    Write-Output "Modules need updating."
+    Write-Output "Run 'Invoke-ModuleCleanup'"
+}
+$Modules | Format-Table
 
 
 #endregion

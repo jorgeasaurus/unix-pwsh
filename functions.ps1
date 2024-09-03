@@ -283,3 +283,40 @@ function Google {
         Start-Process "$url"
     }
 }
+
+function Get-PSModuleUpdates {
+    param
+    (
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
+        [string]$Name,
+
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory)]
+        [version]$Version,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$Repository = 'PSGallery',
+
+        [switch]$OutdatedOnly
+    )
+    
+    process {
+        try {
+            $latestVersion = [version](Find-Module -Name $Name -Repository $Repository -ErrorAction Stop).Version
+            $needsUpdate = $latestVersion -gt $Version
+        } catch {
+            Write-Warning "Error finding module $Name in repository $($Repository): $_"
+            return
+        }
+
+        if ($needsUpdate -or -not $OutdatedOnly) {
+            [PSCustomObject]@{
+                ModuleName     = $Name
+                CurrentVersion = $Version
+                LatestVersion  = $latestVersion
+                NeedsUpdate    = $needsUpdate
+                Repository     = $Repository
+            }
+        }
+    }
+}
+
