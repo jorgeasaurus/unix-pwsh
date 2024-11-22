@@ -4,10 +4,10 @@ $configPath = "$HOME\pwsh_custom_config.yml"
 $githubUser = "jorgeasaurus"
 $name = "Jorge"
 $OhMyPoshConfig = "/opt/homebrew/opt/oh-my-posh/themes/powerlevel10k_rainbow.omp.json"
-$font = "Cascadia Code NF" # Font-Display and variable Name, name the same as font_folder
-$font_url = "https://github.com/microsoft/cascadia-code/releases/download/v2404.23/CascadiaCode-2404.23.zip" # Put here the URL of the font file that should be installed
-$fontFileName = "CascadiaCodeNF.ttf" # Put here the font file that should be installed
-$font_folder = "CascadiaCode-2404.23\ttf" # Put here the name of the zip folder, but without the .zip extension.
+$font = "CascadiaCode"
+$font_url = "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/CascadiaCode.zip"
+$font_folder = "CascadiaCode"
+$fontFileName = "CaskaydiaCoveNerdFont-Regular.ttf"
 $UserProfile = $HOME
 Set-Variable -Name Onedrive -Value "$UserProfile\OneDrive" -Scope global
 
@@ -32,35 +32,84 @@ function Initialize-DevEnv {
     Write-Host "✅ Successfully initialized Pwsh with all modules and applications`n" -ForegroundColor Green
 }
 
-# Function to create config file
+# Function to create config file and install modules
 function Install-Config {
-    if (-not (Test-Path -Path $configPath)) {
-        New-Item -ItemType File -Path $configPath | Out-Null
-        Write-Host "Configuration file created at $configPath ❗" -ForegroundColor Yellow
-    } else {
-        Write-Host "✅ Successfully loaded config file" -ForegroundColor Green
-    }
-    Initialize-Keys
-
-    $modules = @(
-        @{ Name = "Powershell-Yaml"; ConfigKey = "Powershell-Yaml_installed" },
-        @{ Name = "Terminal-Icons"; ConfigKey = "Terminal-Icons_installed" },
-        @{ Name = "PoshFunctions"; ConfigKey = "PoshFunctions_installed" },
-        @{ Name = "Get-ChildItemColor"; ConfigKey = "Get-ChildItemColor_installed" }
-
+    param (
+        [string]$configPath = "$HOME/.pwsh/config.yaml",
+        [switch]$Force
     )
-    $importedModuleCount = 0
-    foreach ($module in $modules) {
-        $isInstalled = Get-ConfigValue -Key $module.ConfigKey
-        if ($isInstalled -ne "True") {
-            Write-Host "Initializing $($module.Name) module..."
-            Initialize-Module $module.Name
-        } else {
-            Import-Module $module.Name
-            $importedModuleCount++
+    
+    try {
+        # Ensure config directory exists
+        $configDir = Split-Path -Parent $configPath
+        if (-not (Test-Path -Path $configDir)) {
+            New-Item -ItemType Directory -Path "$HOME/.pwsh" -Force | Out-Null
+            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
         }
+
+        # Create or load config file
+        if (-not (Test-Path -Path $configPath) -or $Force) {
+            New-Item -ItemType File -Path $configPath -Force | Out-Null
+            Write-Host "Configuration file created at $configPath ❗" -ForegroundColor Yellow
+        } else {
+            Write-Host "✅ Loading existing config file" -ForegroundColor Green
+        }
+        
+        # Initialize config keys if needed
+        Initialize-Keys
+
+        # Define required modules with versions
+        $modules = @(
+            @{
+                Name       = "Powershell-Yaml"
+                ConfigKey  = "Powershell-Yaml_installed"
+                MinVersion = "0.4.2"
+            },
+            @{
+                Name       = "Terminal-Icons"
+                ConfigKey  = "Terminal-Icons_installed" 
+                MinVersion = "0.9.0"
+            },
+            @{
+                Name       = "PoshFunctions"
+                ConfigKey  = "PoshFunctions_installed"
+                MinVersion = "2.2.5"
+            },
+            @{
+                Name       = "Get-ChildItemColor"
+                ConfigKey  = "Get-ChildItemColor_installed"
+                MinVersion = "1.2.0"
+            }
+        )
+
+        $importedModuleCount = 0
+        foreach ($module in $modules) {
+            try {
+                $isInstalled = Get-ConfigValue -Key $module.ConfigKey
+                if ($isInstalled -ne "True") {
+                    Write-Host "Installing $($module.Name) module..." -ForegroundColor Yellow
+                    Install-Module -Name $module.Name -Scope CurrentUser -MinimumVersion $module.MinVersion -Force
+                    Set-ConfigValue -Key $module.ConfigKey -Value "True"
+                }
+                
+                # Import module and verify
+                Import-Module $module.Name -MinimumVersion $module.MinVersion -ErrorAction Stop
+                $importedModuleCount++
+                
+            } catch {
+                Write-Warning "Failed to process module $($module.Name): $_"
+                Set-ConfigValue -Key $module.ConfigKey -Value "False"
+            }
+        }
+
+        Write-Host "✅ Imported $importedModuleCount of $($modules.Count) modules successfully." -ForegroundColor Green
+
+    } catch {
+        Write-Error "Failed to configure PowerShell environment: $_"
+        return $false
     }
-    Write-Host "✅ Imported $importedModuleCount modules successfully." -ForegroundColor Green
+    
+    #return $true
 }
 
 # Function to set a value in the config file
@@ -284,7 +333,7 @@ function Invoke-ModuleCleanup {
 
 # Inject OhMyPosh
 if (Test-Path $OhMyPoshCommand) {
-    $OhMyPoshVersion = (&"$OhMyPoshCommand" --version)
+    $OhMyPoshVersion = (&"$OhMyPoshCommand" version)
     '{0}Oh My Posh version {1} is installed. Loading custom theme.' -f $Tab, $OhMyPoshVersion
         (@(&"$OhMyPoshCommand" init pwsh --config="$OhMyPoshConfig" --print) -join [System.Environment]::NewLine) | Invoke-Expression
 } else {
