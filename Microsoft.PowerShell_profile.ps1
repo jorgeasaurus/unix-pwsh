@@ -71,11 +71,6 @@ function Install-Config {
                 MinVersion = "0.9.0"
             },
             @{
-                Name       = "PoshFunctions"
-                ConfigKey  = "PoshFunctions_installed"
-                MinVersion = "2.2.5"
-            },
-            @{
                 Name       = "Get-ChildItemColor"
                 ConfigKey  = "Get-ChildItemColor_installed"
                 MinVersion = "1.2.0"
