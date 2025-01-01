@@ -3,9 +3,9 @@
 # Does the the rough equivalent of dir /s /b. For example, dirs *.png is dir /s /b *.png
 function dirs {
     if ($args.Count -gt 0) {
-        Get-ChildItem -Recurse -Include "$args" | Foreach-Object FullName
+        Get-ChildItem -Recurse -Include "$args" | ForEach-Object FullName
     } else {
-        Get-ChildItem -Recurse | Foreach-Object FullName
+        Get-ChildItem -Recurse | ForEach-Object FullName
     }
 }
 
@@ -18,7 +18,7 @@ function which($name) {
 }
 
 function export($name, $value) {
-    set-item -force -path "env:$name" -value $value;
+    Set-Item -Force -Path "env:$name" -Value $value;
 }
 
 function pgrep($name) {
@@ -33,7 +33,8 @@ function grep {
     process {
         if ($dir) {
             Get-ChildItem -Path $dir -Recurse -File | Select-String -Pattern $regex
-        } else {     # Use if piped input is provided
+        } else {
+            # Use if piped input is provided
             $input | Select-String -Pattern $regex
         }
     }
@@ -112,12 +113,12 @@ function unzip {
 
 Set-Alias ll Get-ChildItemColor -Option AllScope
 Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
-function df {get-volume}
+function df { get-volume }
 
 # Aliases for reboot and poweroff
-function Reboot-System {Restart-Computer -Force}
+function Reboot-System { Restart-Computer -Force }
 Set-Alias reboot Reboot-System
-function Poweroff-System {Stop-Computer -Force}
+function Poweroff-System { Stop-Computer -Force }
 Set-Alias poweroff Poweroff-System
 
 # Useful file-management functions
@@ -137,7 +138,7 @@ function admin {
 # Display system uptime
 function uptime {
     if ($PSVersionTable.PSVersion.Major -eq 5) {
-        $lastBootUpTime = Get-WmiObject win32_operatingsystem | Select-Object @{Name='LastBootUpTime'; Expression={$_.ConverttoDateTime($_.lastbootuptime)}}
+        $lastBootUpTime = Get-WmiObject win32_operatingsystem | Select-Object @{Name = 'LastBootUpTime'; Expression = { $_.ConverttoDateTime($_.lastbootuptime) } }
         $uptime = (Get-Date) - $lastBootUpTime.LastBootUpTime
     } else {
         $since = net statistics workstation | Select-String "since" | ForEach-Object { $_.ToString().Replace('Statistics since ', '') }
@@ -146,7 +147,6 @@ function uptime {
     }
     return "Online since $($uptime.Days) days, $($uptime.Hours) hours, $($uptime.Minutes) minutes"
 }
-
 
 function sys {
     Start-Process -FilePath cmd.exe -Verb Runas -ArgumentList '/k C:\Windows\System32\PsExec.exe -i -accepteula -s powershell.exe'
@@ -283,7 +283,6 @@ function Google {
         Start-Process "$url"
     }
 }
-
 function Get-PSModuleUpdates {
     param
     (
@@ -319,4 +318,65 @@ function Get-PSModuleUpdates {
         }
     }
 }
+function reload-profile {
+    & $profile
+}
+function Invoke-ModuleCleanup {
+    $Modules = Get-InstalledModule | Sort-Object Name | Get-PSModuleUpdates -OutdatedOnly
+    if ($Modules) {
+        Write-Output "Modules need updating."
+        Write-Output "Running 'Invoke-ModuleCleanup'"
+        $Modules | Format-Table
+        Update-Module -Force
+        Get-InstalledModule | ForEach-Object {
+            $CurrentVersion = $PSItem.Version
+            Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
+        } | Uninstall-Module -Verbose
+    }
+}
 
+function Invoke-PsReadline {
+    #region PSReadLine
+    ''
+    'PSReadLine:'
+
+    $PSReadLineHistoryPath = Split-Path -Path $PSReadLineHistoryFile -Parent -ErrorAction SilentlyContinue
+    if (-Not ($PSReadLineHistoryPath)) {
+        '{0}Creating PSReadLine history path: {1}' -f $Tab, $PSReadLineHistoryPath
+        try {
+            New-Item -Path $PSReadLineHistoryPath -ItemType Directory -Force
+        } catch {
+            '{0}Failed to create PSReadLine history path. Error: {1}' -f $Tab, $_
+        }
+    }
+
+    Set-PSReadLineKeyHandler -Key Escape -Function RevertLine
+    Set-PSReadLineKeyHandler -Function MenuComplete -Chord 'Ctrl+@'
+    Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
+    Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+    Set-PSReadLineOption -ShowToolTips -BellStyle Visual
+    Set-PSReadLineOption -Colors @{
+        Comment  = [consolecolor]::DarkBlue
+        Operator = [consolecolor]::DarkBlue
+        String   = [consolecolor]::DarkMagenta
+    }
+    $PSReadLineOptions = @{
+        HistoryNoDuplicates = $true
+        HistorySaveStyle    = 'SaveIncrementally'
+        HistorySavePath     = $PSReadLineHistoryFile
+    }
+    try {
+        if ($PSVersionTable.PSEdition -eq 'Core') {
+            $PSReadLineOptions.Add('PredictionSource', 'History')
+            $PSReadLineOptions.Add('PredictionViewStyle', 'ListView')
+            $PSReadLineOptions.Add('EditMode', 'Windows')
+
+        }
+        Set-PSReadLineOption @PSReadLineOptions
+        '{0}Set PSReadLine options.' -f $Tab
+    } catch {
+        'Failed to set PSReadLine options. Error: {0}' -f $_
+    }
+    #endregion
+}

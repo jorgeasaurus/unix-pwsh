@@ -1,6 +1,6 @@
 # Check Internet and exit if it takes longer than 1 second
 $canConnectToGitHub = Test-Connection github.com -Count 1 -Quiet -TimeoutSeconds 1
-$configPath = "$HOME\pwsh_custom_config.yml"
+$configPath = "$HOME\pwsh_custom_config.json"
 $githubUser = "jorgeasaurus"
 $name = "Jorge"
 $OhMyPoshConfig = "/opt/homebrew/opt/oh-my-posh/themes/powerlevel10k_rainbow.omp.json"
@@ -35,7 +35,7 @@ function Initialize-DevEnv {
 # Function to create config file and install modules
 function Install-Config {
     param (
-        [string]$configPath = "$HOME/.pwsh/config.yaml",
+        [string]$configPath = "$HOME\pwsh_custom_config.json",
         [switch]$Force
     )
     
@@ -43,12 +43,14 @@ function Install-Config {
         # Ensure config directory exists
         $configDir = Split-Path -Parent $configPath
         if (-not (Test-Path -Path $configDir)) {
+            Write-Host "Creating config directory at $configDir" -ForegroundColor Yellow
             New-Item -ItemType Directory -Path "$HOME/.pwsh" -Force | Out-Null
             New-Item -ItemType Directory -Path $configDir -Force | Out-Null
         }
 
         # Create or load config file
         if (-not (Test-Path -Path $configPath) -or $Force) {
+            Write-Host "Creating config file at $configPath" -ForegroundColor Yellow
             New-Item -ItemType File -Path $configPath -Force | Out-Null
             Write-Host "Configuration file created at $configPath ❗" -ForegroundColor Yellow
         } else {
@@ -60,11 +62,6 @@ function Install-Config {
 
         # Define required modules with versions
         $modules = @(
-            @{
-                Name       = "Powershell-Yaml"
-                ConfigKey  = "Powershell-Yaml_installed"
-                MinVersion = "0.4.2"
-            },
             @{
                 Name       = "Terminal-Icons"
                 ConfigKey  = "Terminal-Icons_installed" 
@@ -80,20 +77,25 @@ function Install-Config {
         $importedModuleCount = 0
         foreach ($module in $modules) {
             try {
+  
+
                 $isInstalled = Get-ConfigValue -Key $module.ConfigKey
+  
+
                 if ($isInstalled -ne "True") {
                     Write-Host "Installing $($module.Name) module..." -ForegroundColor Yellow
                     Install-Module -Name $module.Name -Scope CurrentUser -MinimumVersion $module.MinVersion -Force
-                    Set-ConfigValue -Key $module.ConfigKey -Value "True"
+                    Set-ConfigValue -Key $module.ConfigKey -Value "True" -configPath $configPath
                 }
                 
                 # Import module and verify
+  
                 Import-Module $module.Name -MinimumVersion $module.MinVersion -ErrorAction Stop
                 $importedModuleCount++
                 
             } catch {
                 Write-Warning "Failed to process module $($module.Name): $_"
-                Set-ConfigValue -Key $module.ConfigKey -Value "False"
+                Set-ConfigValue -Key $module.ConfigKey -Value "False" -configPath $configPath
             }
         }
 
@@ -104,6 +106,7 @@ function Install-Config {
         return $false
     }
     
+  
     #return $true
 }
 
@@ -111,24 +114,29 @@ function Install-Config {
 function Set-ConfigValue {
     param (
         [string]$Key,
-        [string]$Value
+        [string]$Value,
+        [string]$configPath
     )
     $config = @{}
     # Try to load the existing config file content
     if (Test-Path -Path $configPath) {
         $content = Get-Content $configPath -Raw
         if (-not [string]::IsNullOrEmpty($content)) {
-            $config = $content | ConvertFrom-Yaml
+            $config = $content | ConvertFrom-Json
         }
     }
-    # Ensure $config is a hashtable
-    if (-not $config) {
-        $config = @{}
+    
+    # Create a PSCustomObject if $config is empty
+    if ($config.Count -eq 0) {
+        $config = [PSCustomObject]@{}
     }
-    $config[$Key] = $Value
-    $config | ConvertTo-Yaml | Set-Content $configPath
-    # Write-Host "Set '$Key' to '$Value' in configuration file." -ForegroundColor Green
-    Initialize-Keys
+    
+    # Add or update the property
+    $config | Add-Member -MemberType NoteProperty -Name $Key -Value $Value -Force
+    
+    # Convert to JSON and save
+    $config | ConvertTo-Json -Depth 10 | Set-Content -Path $configPath -Encoding utf8
+    Write-Host "Set '$Key' to '$Value' in configuration file." -ForegroundColor Green
 }
 
 # Function to get a value from the config file
@@ -136,39 +144,27 @@ function Get-ConfigValue {
     param (
         [string]$Key
     )
+  
     $config = @{}
     # Try to load the existing config file content
     if (Test-Path -Path $configPath) {
+  
         $content = Get-Content $configPath -Raw
         if (-not [string]::IsNullOrEmpty($content)) {
-            $config = $content | ConvertFrom-Yaml
+  
+            $config = $content | ConvertFrom-Json
         }
     }
-    # Ensure $config is a hashtable
     if (-not $config) {
+  
         $config = @{}
     }
-    return $config[$Key]
-}
-
-function Initialize-Module {
-    param (
-        [string]$moduleName
-    )
-    if ($global:canConnectToGitHub) {
-        try {
-            Install-Module -Name $moduleName -Scope CurrentUser -SkipPublisherCheck
-            Set-ConfigValue -Key "${moduleName}_installed" -Value "True"
-        } catch {
-            Write-Error "❌ Failed to install module ${moduleName}: $_"
-        }
-    } else {
-        Write-Host "❌ Skipping Module initialization check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
-    }
+    $value = $config.$Key
+    return $value
 }
 
 function Initialize-Keys {
-    $keys = "Terminal-Icons_installed", "Powershell-Yaml_installed", "PoshFunctions_installed", "Get-ChildItemColor_installed", "${font}_installed", "ohmyposh_installed"
+    $keys = "Terminal-Icons_installed", "Get-ChildItemColor_installed"
     foreach ($key in $keys) {
         $value = Get-ConfigValue -Key $key
         Set-Variable -Name $key -Value $value -Scope Global
@@ -191,7 +187,6 @@ Install-Config
 # ----------------------------------------------------------
 # Deferred loading
 # ----------------------------------------------------------
-
 
 $Deferred = {
     # Create profile if not exists
@@ -262,81 +257,7 @@ switch ([System.Environment]::OSVersion.Platform) {
         if (-not(Test-Path $OhMyPoshCommand)) {
             brew install jandedobbeleer/oh-my-posh/oh-my-posh
         }
+        Invoke-PsReadline
     }
     Default {}
 }
-
-#region PSReadLine
-''
-'PSReadLine:'
-
-$PSReadLineHistoryPath = Split-Path -Path $PSReadLineHistoryFile -Parent -ErrorAction SilentlyContinue
-if (-Not ($PSReadLineHistoryPath)) {
-    '{0}Creating PSReadLine history path: {1}' -f $Tab, $PSReadLineHistoryPath
-    try {
-        New-Item -Path $PSReadLineHistoryPath -ItemType Directory -Force
-    } catch {
-        '{0}Failed to create PSReadLine history path. Error: {1}' -f $Tab, $_
-    }
-}
-
-Set-PSReadLineKeyHandler -Key Escape -Function RevertLine
-Set-PSReadLineKeyHandler -Function MenuComplete -Chord 'Ctrl+@'
-Set-PSReadLineKeyHandler -Key UpArrow -Function HistorySearchBackward
-Set-PSReadLineKeyHandler -Key DownArrow -Function HistorySearchForward
-Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
-Set-PSReadLineOption -ShowToolTips -BellStyle Visual
-Set-PSReadLineOption -Colors @{
-    Comment  = [consolecolor]::DarkBlue
-    Operator = [consolecolor]::DarkBlue
-    String   = [consolecolor]::DarkMagenta
-}
-$PSReadLineOptions = @{
-    HistoryNoDuplicates = $true
-    HistorySaveStyle    = 'SaveIncrementally'
-    HistorySavePath     = $PSReadLineHistoryFile
-}
-try {
-    if ($PSVersionTable.PSEdition -eq 'Core') {
-        $PSReadLineOptions.Add('PredictionSource', 'History')
-        $PSReadLineOptions.Add('PredictionViewStyle', 'ListView')
-        $PSReadLineOptions.Add('EditMode', 'Windows')
-
-    }
-    Set-PSReadLineOption @PSReadLineOptions
-    '{0}Set PSReadLine options.' -f $Tab
-} catch {
-    'Failed to set PSReadLine options. Error: {0}' -f $_
-}
-
-function reload-profile {
-    & $profile
-}
-function Invoke-ModuleCleanup {
-    $Modules = Get-InstalledModule | Sort-Object Name | Get-PSModuleUpdates -OutdatedOnly
-    if ($Modules) {
-        Write-Output "Modules need updating."
-        Write-Output "Running 'Invoke-ModuleCleanup'"
-        $Modules | Format-Table
-        Update-Module -Force
-        Get-InstalledModule | ForEach-Object {
-            $CurrentVersion = $PSItem.Version
-            Get-InstalledModule -Name $PSItem.Name -AllVersions | Where-Object -Property Version -LT -Value $CurrentVersion
-        } | Uninstall-Module -Verbose
-    }
-}
-
-# Inject OhMyPosh
-if (Test-Path $OhMyPoshCommand) {
-    $OhMyPoshVersion = (&"$OhMyPoshCommand" version)
-    '{0}Oh My Posh version {1} is installed. Loading custom theme.' -f $Tab, $OhMyPoshVersion
-        (@(&"$OhMyPoshCommand" init pwsh --config="$OhMyPoshConfig" --print) -join [System.Environment]::NewLine) | Invoke-Expression
-} else {
-    '{0}Oh My Posh configuration file ({1}) not found. Not loading Oh My Posh.' -f $Tab, $OhMyPoshConfig | Write-Warning
-}
-
-
-
-
-
-#endregion
