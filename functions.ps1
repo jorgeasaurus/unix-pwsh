@@ -380,3 +380,101 @@ function Invoke-PsReadline {
     }
     #endregion
 }
+
+function Update-Modules {
+    param (
+        [switch]$AllowPrerelease,
+        [string]$Name = '*',
+        [switch]$WhatIf,
+        [int]$ThrottleLimit = 5
+    )
+    
+    # Get all installed modules
+    Write-Host ("Retrieving all installed modules ...") -ForegroundColor Green
+    [array]$CurrentModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue | 
+    Select-Object Name, Version, Repository | 
+    Sort-Object Name
+
+    if (-not $CurrentModules) {
+        Write-Host ("No modules found.") -ForegroundColor Gray
+        return
+    }
+    
+    Write-Host ("{0} modules found." -f $CurrentModules.Count) -ForegroundColor Gray
+    Write-Host ("Updating installed modules to the latest {0} version ..." -f $(if ($AllowPrerelease) { "PreRelease" } else { "Production" })) -ForegroundColor Green
+
+    # Create hashtable to store original versions
+    $script:OldVersions = @{}
+    foreach ($Module in $CurrentModules) {
+        $script:OldVersions[$Module.Name] = $Module.Version
+    }
+
+    # Use parallel processing for updating modules
+    $CurrentModules | ForEach-Object -Parallel {
+        $Module = $_
+        $AllowPrerelease = $using:AllowPrerelease
+        $WhatIf = $using:WhatIf
+        
+        try {
+            # Check the latest version online
+            $findParams = @{
+                Name            = $Module.Name
+                AllowPrerelease = $AllowPrerelease
+                ErrorAction     = 'Stop'
+            }
+            
+            $latest = Find-Module @findParams | Select-Object -First 1
+            
+            if ($latest.Version -and $Module.Version -and ([version]$latest.Version -gt [version]$Module.Version)) {
+                $updateParams = @{
+                    Name            = $Module.Name
+                    AllowPrerelease = $AllowPrerelease
+                    AcceptLicense   = $true
+                    Force           = $true
+                    WhatIf          = $WhatIf
+                    ErrorAction     = 'Stop'
+                }
+                
+                Update-Module @updateParams
+                Write-Host ("Updated {0} from version {1} to {2}" -f $Module.Name, $Module.Version, $latest.Version) -ForegroundColor Yellow
+                
+                # Cleanup old versions
+                if (-not $WhatIf) {
+                    $AllVersions = Get-InstalledModule -Name $Module.Name -AllVersions | Sort-Object PublishedDate -Descending
+                    foreach ($Version in $AllVersions | Select-Object -Skip 1) {
+                        try {
+                            Uninstall-Module -Name $Module.Name -RequiredVersion $Version.Version -Force -ErrorAction Stop
+                            Write-Host ("Uninstalled older version {0} of {1}" -f $Version.Version, $Module.Name) -ForegroundColor Gray
+                        } catch {
+                            Write-Warning ("Failed to uninstall version {0} of {1}: {2}" -f $Version.Version, $Module.Name, $_.Exception.Message)
+                        }
+                    }
+                }
+            } else {
+                Write-Host ("{0} is up to date (version {1})" -f $Module.Name, $Module.Version) -ForegroundColor Cyan
+            }
+        } catch {
+            Write-Warning ("{0}: {1}" -f $Module.Name, $_.Exception.Message)
+        }
+    } -ThrottleLimit $ThrottleLimit
+
+    # Summary of updates
+    if (-not $WhatIf) {
+        $NewModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue | 
+        Select-Object Name, Version | 
+        Sort-Object Name
+
+        $UpdatedModules = $NewModules | Where-Object { 
+            $script:OldVersions[$_.Name] -ne $_.Version 
+        }
+        
+        if ($UpdatedModules) {
+            Write-Host "`nUpdated modules:" -ForegroundColor Green
+            foreach ($Module in $UpdatedModules) {
+                Write-Host ("- {0}: {1} -> {2}" -f $Module.Name, $script:OldVersions[$Module.Name], $Module.Version) -ForegroundColor Green
+            }
+        } else {
+            Write-Host "`nNo modules were updated." -ForegroundColor Gray
+        }
+    }
+}

@@ -257,6 +257,7 @@ switch ([System.Environment]::OSVersion.Platform) {
         if (-not(Test-Path $OhMyPoshCommand)) {
             brew install jandedobbeleer/oh-my-posh/oh-my-posh
         }
+        & $OhMyPoshCommand --init | Invoke-Expression
         Invoke-PsReadline
     }
     Default {}
