@@ -33,77 +33,6 @@ function Initialize-DevEnv {
 }
 
 # Function to create config file and install modules
-function Install-Config {
-    param (
-        [string]$configPath = "$HOME\pwsh_custom_config.json",
-        [switch]$Force
-    )
-
-    try {
-        # Ensure config directory exists
-        $configDir = Split-Path -Parent $configPath
-        if (-not (Test-Path -Path $configDir)) {
-            Write-Host "Creating config directory at $configDir" -ForegroundColor Yellow
-            New-Item -ItemType Directory -Path "$HOME/.pwsh" -Force | Out-Null
-            New-Item -ItemType Directory -Path $configDir -Force | Out-Null
-        }
-
-        # Create or load config file
-        if (-not (Test-Path -Path $configPath) -or $Force) {
-            Write-Host "Creating config file at $configPath" -ForegroundColor Yellow
-            New-Item -ItemType File -Path $configPath -Force | Out-Null
-            Write-Host "Configuration file created at $configPath ❗" -ForegroundColor Yellow
-        } else {
-            Write-Host "✅ Loading existing config file" -ForegroundColor Green
-        }
-
-        # Initialize config keys if needed
-        Initialize-Keys
-
-        # Define required modules with versions
-        $modules = @(
-            @{
-                Name       = "Terminal-Icons"
-                ConfigKey  = "Terminal-Icons_installed"
-                MinVersion = "0.9.0"
-            },
-            @{
-                Name       = "Get-ChildItemColor"
-                ConfigKey  = "Get-ChildItemColor_installed"
-                MinVersion = "1.2.0"
-            }
-        )
-
-        $importedModuleCount = 0
-        foreach ($module in $modules) {
-            try {
-
-
-
-                Write-Host "Installing $($module.Name) module..." -ForegroundColor Yellow
-                Install-Module -Name $module.Name -Scope CurrentUser -MinimumVersion $module.MinVersion -Force
-
-
-                # Import module and verify
-
-                Import-Module $module.Name -MinimumVersion $module.MinVersion -ErrorAction Stop
-                $importedModuleCount++
-
-            } catch {
-                Write-Warning "Failed to process module $($module.Name): $_"
-            }
-        }
-
-        Write-Host "✅ Imported $importedModuleCount of $($modules.Count) modules successfully." -ForegroundColor Green
-
-    } catch {
-        Write-Error "Failed to configure PowerShell environment: $_"
-        return $false
-    }
-
-
-    #return $true
-}
 
 # -------------
 # Run section
@@ -112,9 +41,6 @@ Write-Host ""
 Write-Host "Welcome $name ⚡" -ForegroundColor DarkCyan
 Write-Host ""
 #All Colors: Black, Blue, Cyan, DarkBlue, DarkCyan, DarkGray, DarkGreen, DarkMagenta, DarkRed, DarkYellow, Gray, Green, Magenta, Red, White, Yellow.
-
-
-Install-Config
 
 . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/functions.ps1" -UseBasicParsing).Content
 
