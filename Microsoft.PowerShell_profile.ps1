@@ -16,11 +16,11 @@ function Initialize-DevEnv {
         Write-Host "❌ Skipping dev-environment initialization due to GitHub.com not responding within 1 second." -ForegroundColor Red
         return
     }
-    
-    if ($ohmyposh_installed -ne "True") { 
+
+    if ($ohmyposh_installed -ne "True") {
         Write-Host "⚡ Invoking Helper-Script" -ForegroundColor Yellow
         . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/pwsh_helper.ps1" -UseBasicParsing).Content
-        Test-ohmyposh 
+        Test-ohmyposh
     }
     $font_installed_var = "${font}_installed"
     if (((Get-Variable -Name $font_installed_var).Value) -ne "True") {
@@ -28,7 +28,7 @@ function Initialize-DevEnv {
         . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/pwsh_helper.ps1" -UseBasicParsing).Content
         Test-$font
     }
-    
+
     Write-Host "✅ Successfully initialized Pwsh with all modules and applications`n" -ForegroundColor Green
 }
 
@@ -38,7 +38,7 @@ function Install-Config {
         [string]$configPath = "$HOME\pwsh_custom_config.json",
         [switch]$Force
     )
-    
+
     try {
         # Ensure config directory exists
         $configDir = Split-Path -Parent $configPath
@@ -56,7 +56,7 @@ function Install-Config {
         } else {
             Write-Host "✅ Loading existing config file" -ForegroundColor Green
         }
-        
+
         # Initialize config keys if needed
         Initialize-Keys
 
@@ -64,7 +64,7 @@ function Install-Config {
         $modules = @(
             @{
                 Name       = "Terminal-Icons"
-                ConfigKey  = "Terminal-Icons_installed" 
+                ConfigKey  = "Terminal-Icons_installed"
                 MinVersion = "0.9.0"
             },
             @{
@@ -77,25 +77,20 @@ function Install-Config {
         $importedModuleCount = 0
         foreach ($module in $modules) {
             try {
-  
 
-                $isInstalled = Get-ConfigValue -Key $module.ConfigKey
-  
 
-                if ($isInstalled -ne "True") {
-                    Write-Host "Installing $($module.Name) module..." -ForegroundColor Yellow
-                    Install-Module -Name $module.Name -Scope CurrentUser -MinimumVersion $module.MinVersion -Force
-                    Set-ConfigValue -Key $module.ConfigKey -Value "True" -configPath $configPath
-                }
-                
+
+                Write-Host "Installing $($module.Name) module..." -ForegroundColor Yellow
+                Install-Module -Name $module.Name -Scope CurrentUser -MinimumVersion $module.MinVersion -Force
+
+
                 # Import module and verify
-  
+
                 Import-Module $module.Name -MinimumVersion $module.MinVersion -ErrorAction Stop
                 $importedModuleCount++
-                
+
             } catch {
                 Write-Warning "Failed to process module $($module.Name): $_"
-                Set-ConfigValue -Key $module.ConfigKey -Value "False" -configPath $configPath
             }
         }
 
@@ -105,70 +100,9 @@ function Install-Config {
         Write-Error "Failed to configure PowerShell environment: $_"
         return $false
     }
-    
-  
+
+
     #return $true
-}
-
-# Function to set a value in the config file
-function Set-ConfigValue {
-    param (
-        [string]$Key,
-        [string]$Value,
-        [string]$configPath
-    )
-    $config = @{}
-    # Try to load the existing config file content
-    if (Test-Path -Path $configPath) {
-        $content = Get-Content $configPath -Raw
-        if (-not [string]::IsNullOrEmpty($content)) {
-            $config = $content | ConvertFrom-Json
-        }
-    }
-    
-    # Create a PSCustomObject if $config is empty
-    if ($config.Count -eq 0) {
-        $config = [PSCustomObject]@{}
-    }
-    
-    # Add or update the property
-    $config | Add-Member -MemberType NoteProperty -Name $Key -Value $Value -Force
-    
-    # Convert to JSON and save
-    $config | ConvertTo-Json -Depth 10 | Set-Content -Path $configPath -Encoding utf8
-    Write-Host "Set '$Key' to '$Value' in configuration file." -ForegroundColor Green
-}
-
-# Function to get a value from the config file
-function Get-ConfigValue {
-    param (
-        [string]$Key
-    )
-  
-    $config = @{}
-    # Try to load the existing config file content
-    if (Test-Path -Path $configPath) {
-  
-        $content = Get-Content $configPath -Raw
-        if (-not [string]::IsNullOrEmpty($content)) {
-  
-            $config = $content | ConvertFrom-Json
-        }
-    }
-    if (-not $config) {
-  
-        $config = @{}
-    }
-    $value = $config.$Key
-    return $value
-}
-
-function Initialize-Keys {
-    $keys = "Terminal-Icons_installed", "Get-ChildItemColor_installed"
-    foreach ($key in $keys) {
-        $value = Get-ConfigValue -Key $key
-        Set-Variable -Name $key -Value $value -Scope Global
-    }
 }
 
 # -------------
@@ -195,12 +129,12 @@ $Deferred = {
         Add-Content -Path $PROFILE -Value "iex (iwr `https://raw.githubusercontent.com/$githubUser/unix-pwshs/main/Microsoft.PowerShell_profile.ps1`).Content"
         Write-Host "PowerShell profile created at $PROFILE." -ForegroundColor Yellow
     }
-    
+
     # Update PowerShell in the background
     Start-Job -ScriptBlock {
         Write-Host "⚡ Invoking Helper-Script" -ForegroundColor Yellow
         . Invoke-Expression (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/$githubUser/unix-pwsh/main/pwsh_helper.ps1" -UseBasicParsing).Content
-        Update-PowerShell 
+        Update-PowerShell
     } > $null 2>&1
 }
 
@@ -215,28 +149,28 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 }
 
 switch ([System.Environment]::OSVersion.Platform) {
-    "Win32NT" { 
+    "Win32NT" {
         if ($PSVersionTable.PSEdition -eq 'Core') {
             Write-Host "✅ PowerShell on Windows - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         } else {
             Write-Host "✅ Windows PowerShell - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         }
-    
+
         $global:IsAdmin = [bool](([System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
-    
+
         # Try to import MS PowerToys WinGetCommandNotFound
         Import-Module -Name Microsoft.WinGet.CommandNotFound > $null 2>&1
         if (-not $?) { Write-Host "💭 Make sure to install WingetCommandNotFound by MS PowerToys" -ForegroundColor Yellow }
-    
+
         $OhMyPoshCommand = (Get-Command -Name 'oh-my-posh.exe' -ea 0).Source
         if (($env:TERM_PROGRAM -ne 'vscode') -and $global:IsAdmin) {
             winget upgrade --all
         }
-    
+
         Initialize-DevEnv
-    
+
         $PSReadLineHistoryFile = [System.IO.Path]::Combine($Onedrive, 'PSReadLine', 'PSReadLineHistory.txt')
-        
+
     }
     "Unix" {
         Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green

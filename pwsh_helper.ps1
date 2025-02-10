@@ -7,7 +7,7 @@ Function Test-CommandExists {
     try { if (Get-Command $command) { RETURN $true } }
     Catch { Write-Host "$command does not exist"; RETURN $false }
     Finally { $ErrorActionPreference = $oldPreference }
-} 
+}
 
 function Update-PowerShell {
     if (-not $global:canConnectToGitHub) {
@@ -36,7 +36,7 @@ function Update-PowerShell {
 }
 
 switch ([System.Environment]::OSVersion.Platform) {
-    "Win32NT" { 
+    "Win32NT" {
         if ($PSVersionTable.PSEdition -eq 'Core') {
             Write-Host "✅ PowerShell on Windows - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
         } else {
@@ -77,11 +77,9 @@ switch ([System.Environment]::OSVersion.Platform) {
                 Remove-Item -Path $extractPath -Recurse -Force
             }
         }
-        
-        function Test-ohmyposh {  
-            if (Test-CommandExists oh-my-posh) {
-                Set-ConfigValue -Key "ohmyposh_installed" -Value "True"
-            } else {
+
+        function Test-ohmyposh {
+            if (-not(Test-CommandExists oh-my-posh)) {
                 $installOhMyPosh = Read-Host "Do you want to install Oh-My-Posh? (Y/N)"
                 if ($installOhMyPosh -eq 'Y' -or $installOhMyPosh -eq 'y') {
                     winget install JanDeDobbeleer.OhMyPosh --accept-package-agreements --accept-source-agreements
@@ -90,28 +88,25 @@ switch ([System.Environment]::OSVersion.Platform) {
                 } else {
                     Write-Host "❌ Oh-My-Posh installation skipped." -ForegroundColor Yellow
                 }
-            } 
+            }
         }
-        
+
         function Test-$font {
             $nerdfonts = Get-Font *$font*
-            if ($nerdfonts) {
-                Set-ConfigValue -Key "${font}_installed" -Value "True"
-            } else {
+            if (-not$nerdfonts) {
                 Write-Host "❌ No Nerd-Fonts are installed." -ForegroundColor Red
                 $installNerdFonts = Read-Host "Do you want to install $font NerdFont? (Y/N)"
                 if ($installNerdFonts -eq 'Y' -or $installNerdFonts -eq 'y') {
                     Install-NerdFont
                 } else {
                     Write-Host "❌ NerdFonts installation skipped." -ForegroundColor Yellow
-                    Set-ConfigValue -Key "$font_installed" -Value "False"
                 }
             }
-        }    
+        }
     }
     "Unix" {
-                Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
-   
+        Write-Host "✅ PowerShell on Mac - PSVersion $($PSVersionTable.PSVersion)" -ForegroundColor Green
+
     }
     Default {}
 }

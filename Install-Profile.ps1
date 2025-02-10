@@ -1,10 +1,10 @@
 # install-profile.ps1
 # Simplified platform detection and font installation
 switch ([System.Environment]::OSVersion.Platform) {
-    "Win32NT" { 
+    "Win32NT" {
         # Elevation check
         $global:IsAdmin = [bool](([System.Security.Principal.WindowsPrincipal][System.Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator))
-        
+
         if (!$IsAdmin) {
             Write-Host "⚠️ Elevating permissions..." -ForegroundColor Yellow
             Start-Process powershell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
@@ -45,10 +45,10 @@ switch ([System.Environment]::OSVersion.Platform) {
             Write-Host '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' -ForegroundColor Yellow
             return
         }
-        
+
         # Initialize Homebrew
         $(/opt/homebrew/bin/brew shellenv) | Invoke-Expression
-        
+
         # Install oh-my-posh if missing
         if (-not(Test-Path "/opt/homebrew/bin/oh-my-posh")) {
             brew install jandedobbeleer/oh-my-posh/oh-my-posh
@@ -60,7 +60,7 @@ switch ([System.Environment]::OSVersion.Platform) {
 $ErrorActionPreference = 'Stop'
 
 # Create profile files if missing
-@($profile.CurrentUserAllHosts, $profile.CurrentUserCurrentHost) | ForEach-Object {
+@($profile) | ForEach-Object {
     if (-not (Test-Path $_)) {
         New-Item $_ -ItemType File -Force
     }
@@ -75,12 +75,12 @@ $modules = @(
 
 foreach ($module in $modules) {
     try {
-        Install-Module @module -Scope CurrentUser -Force -SkipPublisherCheck
+        Install-Module -Name $module.Name -AllowPrerelease:$module.AllowPrerelease -Scope CurrentUser -Force -SkipPublisherCheck
     } catch {
         Write-Warning "Failed to install $($module.Name): $_"
     }
 }
 
 # Copy profile and reload
-Copy-Item $PSScriptRoot\Microsoft.PowerShell_profile.ps1 $PROFILE.CurrentUserAllHosts -Force
-. $PROFILE.CurrentUserAllHosts
+Copy-Item $PSScriptRoot\Microsoft.PowerShell_profile.ps1 $PROFILE -Force
+. $PROFILE

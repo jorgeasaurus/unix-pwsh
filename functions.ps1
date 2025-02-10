@@ -9,10 +9,6 @@ function dirs {
     }
 }
 
-function sed($file, $find, $replace) {
-    (Get-Content $file).replace("$find", $replace) | Set-Content $file
-}
-
 function which($name) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
@@ -87,24 +83,12 @@ function unzip {
         [string]$file
     )
     process {
-        if ($file) {
-            $fullPath = Join-Path -Path $pwd -ChildPath $file
-            if (Test-Path $fullPath) {
-                Write-Output "Extracting $file to $pwd"
-                Expand-Archive -Path $fullPath -DestinationPath $pwd
-            } else {
-                Write-Output "File $file does not exist in the current directory"
-            }
+        $fullPath = Join-Path -Path $pwd -ChildPath $file
+        if (Test-Path $fullPath) {
+            Write-Output "Extracting $file to $pwd"
+            Expand-Archive -Path $fullPath -DestinationPath $pwd
         } else {
-            $input | ForEach-Object {
-                $fullPath = Join-Path -Path $pwd -ChildPath $_
-                if (Test-Path $fullPath) {
-                    Write-Output "Extracting $_ to $pwd"
-                    Expand-Archive -Path $fullPath -DestinationPath $pwd
-                } else {
-                    Write-Output "File $_ does not exist in the current directory"
-                }
-            }
+            Write-Output "File $file does not exist in the current directory"
         }
     }
 }
@@ -113,7 +97,7 @@ function unzip {
 
 Set-Alias ll Get-ChildItemColor -Option AllScope
 Set-Alias ls Get-ChildItemColorFormatWide -Option AllScope
-function df { get-volume }
+function df { Get-Volume }
 
 # Aliases for reboot and poweroff
 function Reboot-System { Restart-Computer -Force }
@@ -127,7 +111,7 @@ function cd.... { Set-Location ..\..\.. }
 
 # Function to run a command or shell as admin.
 function admin {
-    if ($args.Count -gt 0) {   
+    if ($args.Count -gt 0) {
         $argList = "& '" + $args + "'"
         Start-Process "wt.exe" -Verb runAs -ArgumentList $argList
     } else {
@@ -297,7 +281,7 @@ function Get-PSModuleUpdates {
 
         [switch]$OutdatedOnly
     )
-    
+
     process {
         try {
             $latestVersion = [version](Find-Module -Name $Name -Repository $Repository -ErrorAction Stop).Version
@@ -388,18 +372,18 @@ function Update-Modules {
         [switch]$WhatIf,
         [int]$ThrottleLimit = 5
     )
-    
+
     # Get all installed modules
     Write-Host ("Retrieving all installed modules ...") -ForegroundColor Green
-    [array]$CurrentModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue | 
-    Select-Object Name, Version, Repository | 
+    [array]$CurrentModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue |
+    Select-Object Name, Version, Repository |
     Sort-Object Name
 
     if (-not $CurrentModules) {
         Write-Host ("No modules found.") -ForegroundColor Gray
         return
     }
-    
+
     Write-Host ("{0} modules found." -f $CurrentModules.Count) -ForegroundColor Gray
     Write-Host ("Updating installed modules to the latest {0} version ..." -f $(if ($AllowPrerelease) { "PreRelease" } else { "Production" })) -ForegroundColor Green
 
@@ -414,7 +398,7 @@ function Update-Modules {
         $Module = $_
         $AllowPrerelease = $using:AllowPrerelease
         $WhatIf = $using:WhatIf
-        
+
         try {
             # Check the latest version online
             $findParams = @{
@@ -422,9 +406,9 @@ function Update-Modules {
                 AllowPrerelease = $AllowPrerelease
                 ErrorAction     = 'Stop'
             }
-            
+
             $latest = Find-Module @findParams | Select-Object -First 1
-            
+
             if ($latest.Version -and $Module.Version -and ([version]$latest.Version -gt [version]$Module.Version)) {
                 $updateParams = @{
                     Name            = $Module.Name
@@ -434,10 +418,10 @@ function Update-Modules {
                     WhatIf          = $WhatIf
                     ErrorAction     = 'Stop'
                 }
-                
+
                 Update-Module @updateParams
                 Write-Host ("Updated {0} from version {1} to {2}" -f $Module.Name, $Module.Version, $latest.Version) -ForegroundColor Yellow
-                
+
                 # Cleanup old versions
                 if (-not $WhatIf) {
                     $AllVersions = Get-InstalledModule -Name $Module.Name -AllVersions | Sort-Object PublishedDate -Descending
@@ -460,14 +444,14 @@ function Update-Modules {
 
     # Summary of updates
     if (-not $WhatIf) {
-        $NewModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue | 
-        Select-Object Name, Version | 
+        $NewModules = Get-InstalledModule -Name $Name -ErrorAction SilentlyContinue |
+        Select-Object Name, Version |
         Sort-Object Name
 
-        $UpdatedModules = $NewModules | Where-Object { 
-            $script:OldVersions[$_.Name] -ne $_.Version 
+        $UpdatedModules = $NewModules | Where-Object {
+            $script:OldVersions[$_.Name] -ne $_.Version
         }
-        
+
         if ($UpdatedModules) {
             Write-Host "`nUpdated modules:" -ForegroundColor Green
             foreach ($Module in $UpdatedModules) {
